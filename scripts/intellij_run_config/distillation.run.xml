@@ -13,7 +13,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/train_model.py" />
-    <option name="PARAMETERS" value="--prefix low_iter --buffer_capacity 1000000 --train_level --frames_per_proc 200 --num_envs 20 --distillation_steps 15 --collect_teacher Direction --collect_policy $PROJECT_DIR$/scripts/logs/persisted_models_distill --distill_teacher OffsetWaypoint --env point_mass --n_advice 1000000 --seed 1 --n_itr 3000" />
+    <option name="PARAMETERS" value="--prefix persisted_models_distill/1 --buffer_capacity 1000000 --train_level --frames_per_proc 200 --num_envs 20 --distillation_steps 15 --collect_teacher Direction --collect_policy $PROJECT_DIR$/scripts/logs/persisted_models_grounded/1 --distill_teacher OffsetWaypoint --env point_mass --n_advice 1000000 --seed 1 --n_itr 3000 --log_interval 10 --eval_interval 100" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

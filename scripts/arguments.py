@@ -78,8 +78,8 @@ class ArgumentParser(argparse.ArgumentParser):
         self.add_argument('--save_option', type=str, default='level',
                           choices=['all', 'level', 'latest', 'none', 'gap'])
         self.add_argument('--save_untrained', action='store_true')
-        self.add_argument("--log_interval", type=int, default=20)
-        self.add_argument("--eval_interval", type=int, default=20)
+        self.add_argument("--log_interval", type=int, default=10)
+        self.add_argument("--eval_interval", type=int, default=100)
         self.add_argument('--no_video', action='store_true')
         self.add_argument('--no_tb', action='store_true')
 
@@ -129,5 +129,28 @@ class ArgumentParser(argparse.ArgumentParser):
         # Set seed for all randomness sources
         if args.seed == -1:
             args.seed = np.random.randint(10000)
+
+        return args
+
+class DistillArgumentParser(argparse.ArgumentParser):
+
+    def __init__(self):
+        super().__init__()
+
+        # Env arguments
+        self.add_argument("--itr",
+                            help="saved ppo agent iteration we should load")
+
+
+    def parse_args(self, arg=None):
+        """
+        Parse the arguments and perform some basic validation
+        """
+
+        args = super().parse_args(arg)
+
+        # Set seed for all randomness sources
+        if args.seed == -1:
+            args.seed = np.random.randint(876)
 
         return args
