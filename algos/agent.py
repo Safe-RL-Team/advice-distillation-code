@@ -136,7 +136,7 @@ class Agent(nn.Module):
             t = time.time()
             if step % 10 == 0:
                 print("XXXXXXXXXXXXXX")
-                pickle_utils.save_ppo_agent_iteration(self, obs, batch, advice=advice, no_advice_obs=no_advice_obs, next_obs=next_obs, itr=str(step))
+                #agent_saver.save_ppo_agent_iteration(self, obs, batch, advice=advice, no_advice_obs=no_advice_obs, next_obs=next_obs, itr=str(step))
             self.update_actor(obs, batch, advice=advice, no_advice_obs=no_advice_obs, next_obs=next_obs)
             actor_time = time.time() - t
             logger.logkv('Time/Actor_Time', actor_time)

@@ -16,6 +16,7 @@ from envs.babyai.levels.envdist import EnvDist
 import pathlib
 import joblib
 import os
+import datetime
 
 
 def args_type(default):
@@ -196,7 +197,7 @@ def eval_policy(policy, env, args, exp_dir):
                     f'{det_accuracy},{reward} \n')
 
 
-def run_experiment(args):
+def load_experiment_objects(args):
     args, log_dict = load_experiment(args)
     if not hasattr(args, 'noise'):
         args.noise = False
@@ -214,23 +215,10 @@ def run_experiment(args):
     # We can't collect with both policies
     assert not (args.collect_with_rl_policy and args.collect_with_distill_policy)
 
-
     log_policy = None
-    if args.rl_teacher is not None:
-        rl_agent = create_agent(args.rl_policy, args.rl_teacher, env, args,
-                                 obs_preprocessor)
-        log_policy = rl_agent
-    else:
-        rl_agent = None
-    if args.distill_teacher is not None:
-        distilling_agent = create_agent(args.distill_policy, args.distill_teacher, env, args, obs_preprocessor)
-        log_policy = distilling_agent
-    else:
-        distilling_agent = None
-    if args.relabel_teacher is not None:
-        relabel_policy = create_agent(args.relabel_policy, args.relabel_teacher, env, args, obs_preprocessor)
-    else:
-        relabel_policy = None
+    rl_agent, log_policy = create_rl_agent(args, env, log_policy, obs_preprocessor)
+    distilling_agent, log_policy = create_distill_agent(args, env, log_policy, obs_preprocessor)
+    relabel_policy = relabel_agent(args, env, obs_preprocessor)
 
     if args.collect_with_rl_policy:
         collect_policy = rl_agent
@@ -256,7 +244,7 @@ def run_experiment(args):
 
     envs = [env.copy() for _ in range(args.num_envs)]
     for i, new_env in enumerate(envs):
-        new_env.seed(i+100)
+        new_env.seed(i + 100)
         new_env.set_task()
         new_env.reset()
     if collect_policy is None:
@@ -267,10 +255,45 @@ def run_experiment(args):
     buffer_name = exp_dir if args.buffer_path is None else args.buffer_path
     args.buffer_name = buffer_name
     num_rollouts = 1 if is_debug else args.num_rollouts
-    log_fn = make_log_fn(env, args, 0, exp_dir, log_policy, hide_instrs=args.hide_instrs, seed=args.seed+1000,
+    log_fn = make_log_fn(env, args, 0, exp_dir, log_policy, hide_instrs=args.hide_instrs, seed=args.seed + 1000,
                          stochastic=True, num_rollouts=num_rollouts, policy_name=exp_name,
                          env_name=str(args.level),
                          log_every=args.log_interval)
+
+    return args, collect_policy, rl_agent, distilling_agent, relabel_policy, relabel_policy, sampler, env, obs_preprocessor, log_dict, log_fn
+
+
+def relabel_agent(args, env, obs_preprocessor):
+    if args.relabel_teacher is not None:
+        relabel_policy = create_agent(args.relabel_policy, args.relabel_teacher, env, args, obs_preprocessor)
+    else:
+        relabel_policy = None
+    return relabel_policy
+
+
+def create_rl_agent(args, env, log_policy, obs_preprocessor):
+    if args.rl_teacher is not None:
+        rl_agent = create_agent(args.rl_policy, args.rl_teacher, env, args,
+                                obs_preprocessor)
+        log_policy = rl_agent
+    else:
+        rl_agent = None
+    return rl_agent, log_policy
+
+
+def create_distill_agent(args, env, log_policy, obs_preprocessor):
+    if args.distill_teacher is not None:
+        distilling_agent = create_agent(args.distill_policy, args.distill_teacher, env, args, obs_preprocessor)
+        log_policy = distilling_agent
+    else:
+        distilling_agent = None
+    return distilling_agent, log_policy
+
+
+def run_experiment(args):
+
+    start = datetime.datetime.now()
+    _, collect_policy, rl_agent, distilling_agent, relabel_policy, relabel_policy, sampler, env, obs_preprocessor, log_dict, log_fn = load_experiment_objects(args)
 
     trainer = Trainer(
         args=args,
@@ -285,6 +308,10 @@ def run_experiment(args):
         log_fn=log_fn,
     )
     trainer.train()
+
+    end = datetime.datetime.now()
+    duration = end - start
+    print(f'Total experiment ran in {duration.total_seconds()}. This means we need approx {duration.total_seconds() * 1000 / 3600} total hours')
 
 
 if __name__ == '__main__':
