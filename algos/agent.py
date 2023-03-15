@@ -40,8 +40,8 @@ class Agent(nn.Module):
 
         if self.use_input_converter:
             self.converter = wtd()
-            if os.path.isfile('trained_input_converter.pth'):
-                self.converter.trunk.load_state_dict(torch.load('trained_input_converter.pth'))
+            if os.path.isfile('../trained_input_converter.pth'):
+                self.converter.trunk.load_state_dict(torch.load('../trained_input_converter.pth'))
 
         # Create encoders or dummy encoders for each piece of our input
         if args.image_obs:
@@ -57,7 +57,7 @@ class Agent(nn.Module):
         else:
             self.advice_embedding = utils.mlp(advice_size, None, advice_dim, 0, output_mod=nn.Sigmoid()).to(self.device)
             if self.use_input_converter:
-                self.advice_embedding.load_state_dict(torch.load('advice embedder.pth'))
+                self.advice_embedding.load_state_dict(torch.load("../advice_embedder.pth"))
 
         # TODO: these next 2 lines are in place since I want to run models collected before recon_coef was added.
         # If you're not doing this, feel free to remove.
@@ -153,7 +153,7 @@ class Agent(nn.Module):
             t = time.time()
             if step % 10 == 0:
                 print("XXXXXXXXXXXXXX")
-                #agent_saver.save_ppo_agent_iteration(self, obs, batch, advice=advice, no_advice_obs=no_advice_obs, next_obs=next_obs, itr=str(step))
+                pickle_utils.save_ppo_agent_iteration(self, obs, batch, advice=advice, no_advice_obs=no_advice_obs, next_obs=next_obs, itr=str(step))
             self.update_actor(obs, batch, advice=advice, no_advice_obs=no_advice_obs, next_obs=next_obs)
             actor_time = time.time() - t
             logger.logkv('Time/Actor_Time', actor_time)
