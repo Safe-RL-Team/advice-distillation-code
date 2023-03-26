@@ -67,6 +67,26 @@ python scripts/train_model.py --buffer_capacity 1000000 --frames_per_proc 40 --n
 python scripts/train_model.py --prefix EXP_NAME --buffer_capacity 1000000 --train_level --frames_per_proc 200 --num_envs 20 --distillation_steps 15 --collect_policy PATH_TO_RL_TRAINED_POLICY --distill_teacher OTHER_TEACHER_NAME --collect_teacher OffsetWaypoint --env point_mass --n_advice 1000000 --seed 1
 ```
 
+```
+--prefix
+persisted_models_distill/original_distillation
+--collect_policy
+logs/persisted_models_distill/claire
+--rl_policy
+logs/persisted_models_distill/claire
+--level
+2
+--frames_per_proc
+200
+--num_envs
+100
+--collect_teacher Direction
+--distill_teacher OffsetWaypoint
+--env point_mass
+--save_option all
+--n_itr 10000
+```
+
 ## Running experiments faster
 
 * Use the easiest form of advice (for PointMaze, try OffsetWaypoint or Direction advice)
@@ -76,3 +96,48 @@ python scripts/train_model.py --prefix EXP_NAME --buffer_capacity 1000000 --trai
 * If you use babyAI, there are even smaller mazes than those used in the paper. These could be faster.
 * Use a GPU, if you have one available.
 * You might see small efficiency gains if you sweep over learning rate and frames_per_proc
+
+### Experiments we ran
+
+#### Distillation 
+```
+--prefix persisted_models_distill/original_distillation_cont
+--collect_policy logs/persisted_models_distill/claire
+--collect_teacher Direction
+--rl_policy logs/persisted_models_distill/claire
+--level 2
+--frames_per_proc 200
+--num_envs 20
+
+--distill_teacher OffsetWaypoint
+--env point_mass
+--save_option all
+--n_itr
+10000
+```
+
+This runs with: 
+rl_agent will be **None**
+distilling_agent is a *newly initialized* PPO Agent
+relabel_policy is **None** 
+
+Collect Teacher is Direction -> 
+collect_policy is the Grounded Agent **with weights**
+
+
+```
+--collect_with_rl_policy
+--rl_policy logs/persisted_models_distill/grounded
+--rl_teacher Direction
+--use_input_converter
+--env point_mass
+--level 2
+--frames_per_proc 200
+--num_envs 20
+--save_option
+all
+--n_itr
+10000
+```
+
+
