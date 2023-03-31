@@ -1,4 +1,8 @@
-test
+
+
+Code base used for [our distillation project](https://safe-rl-team.github.io/advice-distillation-blog/).
+
+Extended from the:
 
 # Official codebase for the paper Teachable Reinforcement Learning via AdviceDistillation.
 
